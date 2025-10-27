@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Campaign Creator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; }
+        .container { max-width: 960px; }
+        .nav-link.active { font-weight: bold; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">Audio Generation</a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link active" href="/">Campaign Creator</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/dashboard">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/voices">Voice Management</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h2>Create New Audio Campaign</h2>
+        <p>Upload a CSV file with leads and provide templates to generate personalized audio for each lead.</p>
+        
+        <form action="/api/v1/campaigns/upload" method="post" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label for="campaign_name" class="form-label">Campaign Name</label>
+                <input type="text" class="form-control" id="campaign_name" name="campaign_name" required>
+            </div>
+            <div class="mb-3">
+                <label for="generation_no" class="form-label">Generation Number (Optional)</label>
+                <input type="text" class="form-control" id="generation_no" name="generation_no">
+            </div>
+
+            <!-- --- CHANGED: File upload is replaced with Voice Group selection --- -->
+            <div class="mb-3">
+                <label for="voice_group_id" class="form-label">Select Voice Group</label>
+                <select class="form-select" id="voice_group_id" name="voice_group_id" required>
+                    <option value="" disabled selected>-- Choose a voice group --</option>
+                    {% for group in voice_groups %}
+                    <option value="{{ group.id }}">{{ group.name }}</option>
+                    {% endfor %}
+                </select>
+                <div class="form-text">Voices from this group will be randomly selected for each lead. Manage groups on the <a href="/voices">Voice Management</a> page.</div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Text Templates</label>
+                <div class="form-text">Use curly braces for variables from your CSV, e.g., <code>{first_name}</code>, <code>{city}</code>.</div>
+                <textarea class="form-control mb-2" name="no_amd_template" rows="3" placeholder="Template for Live Answer (No AMD)" required></textarea>
+                <textarea class="form-control mb-2" name="amd_template" rows="3" placeholder="Template for Voicemail (AMD Detected)" required></textarea>
+                <textarea class="form-control mb-2" name="template_transfer" rows="2" placeholder="Template for Agent Transfer (e.g., 'One moment please.')"></textarea>
+                <textarea class="form-control" name="template_voicemail" rows="3" placeholder="Template for Voicemail Drop (Optional, if you want a different message for AMD vs. direct voicemail drop)"></textarea>
+            </div>
+             <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" id="llm_enabled" name="llm_enabled" value="true">
+                <label class="form-check-label" for="llm_enabled">Enable LLM Rephrasing</label>
+                <div class="form-text">If checked, an AI will rewrite your templates to sound more natural and varied.</div>
+            </div>
+            <div class="mb-3">
+                <label for="csv_file" class="form-label">Lead CSV File (Must contain 'Phone' or 'Phone Number' column)</label>
+                <input type="file" class="form-control" id="csv_file" name="csv_file" accept=".csv" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Start Campaign</button>
+        </form>
+    </div>
+</body>
+</html>

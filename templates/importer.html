@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Import Campaign Package</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5" style="max-width: 700px;">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h4>Import and Deploy Campaign</h4>
+            </div>
+            <div class="card-body">
+                <p>Upload a campaign package (.zip) from the GPU server. This will completely replace the currently active campaign.</p>
+                <form id="uploadForm" action="/api/v1/importer/upload" method="post" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="package" class="form-label">Campaign Package File:</label>
+                        <input class="form-control" type="file" id="package" name="package" accept=".zip" required>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100">Upload and Deploy</button>
+                </form>
+                <div id="status" class="mt-3"></div>
+            </div>
+        </div>
+        <div class="mt-3 text-center">
+             <a href="/dashboard" class="btn btn-secondary">Go to Preview Dashboard</a>
+        </div>
+    </div>
+    <script>
+        const form = document.getElementById('uploadForm');
+        const statusDiv = document.getElementById('status');
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            statusDiv.innerHTML = `<div class="spinner-border text-success" role="status"><span class="visually-hidden">Loading...</span></div> <p>Uploading and deploying, please wait...</p>`;
+            const formData = new FormData(form);
+            fetch('/api/v1/importer/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.detail) {
+                   statusDiv.innerHTML = `<div class="alert alert-danger">${data.detail}</div>`;
+                } else {
+                   statusDiv.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
+                }
+            })
+            .catch(error => {
+                statusDiv.innerHTML = `<div class="alert alert-danger">An unexpected error occurred.</div>`;
+            });
+        });
+    </script>
+</body>
+</html>
